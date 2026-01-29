@@ -1,6 +1,7 @@
 import { useCallback, useRef } from 'react'
 import { toast } from 'sonner'
-import { Copy } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
+import { TextField, Text, Flex } from '@radix-ui/themes'
 import { FormField } from './ui/form-field'
 import { StyledButton } from './ui/styled-button'
 import { cn } from '../lib/utils'
@@ -17,59 +18,71 @@ export const UrlShortener = ({ baseUrl }: UrlShortenerProps) => {
   const copyToClipboard = useCallback(async () => {
     if (copyRef.current && shortUrl) {
       await navigator.clipboard.writeText(shortUrl)
-      toast.success('Copied!')
+      toast.success('Copied to clipboard!')
     }
   }, [shortUrl])
 
   return (
-    <div className="space-y-6">
-      <form onSubmit={shorten} className="space-y-4" noValidate>
+    <div className="space-y-8">
+      {/* Form */}
+      <form onSubmit={shorten} className="space-y-6" noValidate>
         <FormField label="Enter your long URL" error={fieldError} id="url">
-          <input
+          <TextField.Root
             id="url"
-            {...form.register('url')}
-            type="url"
+            size="3"
             placeholder="https://example.com/very/long/url"
-            className={cn(
-              'w-full h-14 rounded-2xl border-2 bg-white px-6 py-4 text-lg shadow-sm transition-all duration-300 ease-in-out',
-              'border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/30 focus:ring-offset-0',
-              'placeholder:text-slate-400 invalid:border-red-400 invalid:focus:ring-red-500/30'
-            )}
+            {...form.register('url')}
             aria-invalid={!!fieldError}
             aria-describedby={fieldError ? 'url-error' : undefined}
+            className={cn(
+              'transition-all duration-300 ease-out',
+              'focus:shadow-[0_0_0_4px_rgba(99,102,241,0.15)] focus:border-indigo-500'
+            )}
           />
         </FormField>
+
         <StyledButton
           type="submit"
           variant="primary"
           size="lg"
+          fullWidth
           loading={isSubmitting}
-          className="w-full"
         >
-          Shorten URL
+          {isSubmitting ? 'Shortening...' : 'Shorten URL'}
         </StyledButton>
       </form>
-      <div className="text-center p-5 bg-gradient-to-r from-slate-50 to-slate-100 rounded-2xl shadow-sm border border-slate-200">
-        <p className="text-sm text-slate-600">
-          Shortened URLs start with{' '}
-          <code className="font-mono bg-slate-200 px-2 py-1 rounded-lg text-slate-800 font-semibold">
+
+      {/* Info base URL */}
+      <div className="text-center">
+        <Text size="2" color="gray" weight="medium">
+          Shortened URLs will start with{' '}
+          <code className="font-mono bg-indigo-50 px-2.5 py-1 rounded-md text-indigo-700 font-semibold border border-indigo-100">
             {baseUrl}
           </code>
-        </p>
+        </Text>
       </div>
+
+      {/* Shortened URL result */}
       {shortUrl && (
-        <div className="space-y-4 pt-8 border-t border-slate-200">
-          <p className="text-center text-xl font-bold text-slate-800 animate-fade-in">
+        <div className="space-y-6 pt-10 border-t border-slate-200 animate-fade-in">
+          <Text
+            size="4"
+            weight="bold"
+            align="center"
+            className="text-slate-800 tracking-tight"
+          >
             Your shortened URL:
-          </p>
-          <div className="flex gap-4">
-            <input
+          </Text>
+
+          <Flex gap="3" align="center" wrap="wrap">
+            <TextField.Root
               ref={copyRef}
               value={shortUrl}
               readOnly
+              size="3"
               className={cn(
-                'flex-1 h-16 rounded-2xl border-2 px-6 py-4 text-xl font-mono shadow-lg cursor-pointer transition-all duration-300 ease-in-out select-all',
-                'bg-gradient-to-r from-emerald-50 via-sky-50 to-emerald-50 border-emerald-300 hover:shadow-xl hover:border-emerald-400 hover:scale-[1.01] focus:ring-4 focus:ring-emerald-500/40'
+                'flex-1 font-mono transition-all duration-300 cursor-pointer',
+                'hover:shadow-md hover:border-indigo-300 focus:shadow-[0_0_0_4px_rgba(99,102,241,0.15)]'
               )}
             />
             <StyledButton
@@ -77,18 +90,21 @@ export const UrlShortener = ({ baseUrl }: UrlShortenerProps) => {
               size="lg"
               type="button"
               onClick={copyToClipboard}
-              className="px-8 shadow-xl"
+              aria-label="Copy shortened URL"
             >
-              <Copy size={24} />
+              Copy
             </StyledButton>
-          </div>
+          </Flex>
         </div>
       )}
       {serverError && (
-        <div className="p-8 bg-gradient-to-r from-red-50 to-rose-50 border-2 border-red-200 rounded-2xl shadow-2xl animate-pulse">
-          <p className="text-xl font-bold text-red-900 text-center leading-tight">
-            {serverError}
-          </p>
+        <div className="p-6 bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 rounded-2xl shadow-sm">
+          <Flex gap="3" align="center" justify="center">
+            <AlertTriangle className="text-red-600 flex-shrink-0" size={20} />
+            <Text size="3" color="red" weight="medium" align="center">
+              {serverError}
+            </Text>
+          </Flex>
         </div>
       )}
     </div>

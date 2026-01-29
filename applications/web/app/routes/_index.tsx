@@ -50,12 +50,17 @@ export default function Index({ loaderData }: Route.ComponentProps) {
       direction="column"
       justify="center"
       align="center"
-      className="min-h-screen bg-linear-to-br from-slate-50 via-white to-slate-100 p-4 sm:p-6 lg:p-12"
+      className="app-center p-4 sm:p-6 lg:p-12"
     >
-      <Card className="w-full max-w-2xl p-12 shadow-2xl rounded-3xl bg-white/80 backdrop-blur-xl border border-slate-100/50">
-        <Heading size="8" align="center" className="mb-12 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 bg-clip-text text-transparent drop-shadow-2xl">
-          URL Shortener
-        </Heading>
+      <Card className="w-full max-w-2xl p-10 md:p-12 shadow-2xl rounded-3xl bg-white/90 backdrop-blur-md border border-slate-100">
+        <div className="text-center mb-8">
+          <Heading size="8" align="center" className="mb-3 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 bg-clip-text text-transparent">
+            URL Shortener
+          </Heading>
+          <p className="text-sm text-slate-600 max-w-prose mx-auto">
+            Create short, memorable links in seconds. Paste a long URL below and get a compact shareable link.
+          </p>
+        </div>
         <UrlShortener baseUrl={baseUrl} />
       </Card>
     </Flex>
