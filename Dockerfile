@@ -6,25 +6,23 @@ FROM base AS dependencies
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY libs/engine/package.json ./libs/engine/
 COPY applications/web/package.json ./applications/web/
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --prod=false
 
 FROM base AS build
 COPY --from=dependencies /app/node_modules ./node_modules
-COPY --from=dependencies /app/libs/engine/node_modules ./libs/engine/node_modules
-COPY --from=dependencies /app/applications/web/node_modules ./applications/web/node_modules
-COPY . .
-RUN pnpm build
+RUN pnpm build --filter=web
 
 FROM base AS production
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/applications/web/node_modules ./applications/web/node_modules
-COPY --from=build /app/libs/engine/node_modules ./libs/engine/node_modules
 COPY --from=build /app/applications/web/build ./applications/web/build
-COPY libs/engine/src ./libs/engine/src
+COPY --from=build /app/libs/engine ./libs/engine
 COPY applications/web/package.json ./applications/web/
 COPY libs/engine/package.json ./libs/engine/
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile --prod --prefix applications/web --prefix libs/engine
+
+COPY wait-for-redis.sh /usr/local/bin/wait-for-redis.sh
+RUN chmod +x /usr/local/bin/wait-for-redis.sh
 
 WORKDIR /app/applications/web
 EXPOSE 3000
-CMD ["pnpm", "start"]
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 CMD curl -f http://localhost:3000 || exit 1
+CMD ["wait-for-redis.sh", "redis:6379", "pnpm", "start"]
