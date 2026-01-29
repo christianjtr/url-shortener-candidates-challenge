@@ -1,9 +1,10 @@
 import { Form, useActionData } from "react-router";
 import type { Route } from "./+types/_index";
+import { baseUrl } from "@url-shortener/engine";
 import {
-  baseUrl,
-  shortenedUrls,
-  generateShortCode,
+  ShortenUrlUseCase,
+  ShortCodeGenerator,
+  RedisUrlRepository,
 } from "@url-shortener/engine";
 
 export function loader() {
@@ -20,13 +21,17 @@ export async function action({ request }: Route.ActionArgs) {
     return { error: "URL is required" };
   }
 
-  const shortCode = generateShortCode();
-
-  shortenedUrls.set(shortCode, url);
-
-  return {
-    shortenedUrl: `${baseUrl}/s/${shortCode}`,
-  };
+  try {
+    const repo = new RedisUrlRepository();
+    const generator = new ShortCodeGenerator(repo);
+    const shortenUseCase = new ShortenUrlUseCase(generator, repo);
+    const shortUrl = await shortenUseCase.execute(url);
+    return {
+      shortenedUrl: `${baseUrl}/s/${shortUrl.code.toString()}`,
+    };
+  } catch (error) {
+    return { error: (error as Error).message };
+  }
 }
 
 export function meta({}: Route.MetaArgs) {
