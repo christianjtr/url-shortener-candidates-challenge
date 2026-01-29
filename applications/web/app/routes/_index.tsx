@@ -54,11 +54,11 @@ export default function Index({ loaderData }: Route.ComponentProps) {
     >
       <Card className="w-full max-w-2xl p-10 md:p-12 shadow-2xl rounded-3xl bg-white/90 backdrop-blur-md border border-slate-100">
         <div className="text-center mb-8">
-          <Heading size="8" align="center" className="mb-3 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 bg-clip-text text-transparent">
+          <Heading size="8" align="center" className="mb-3 bg-linear-to-r from-slate-900 via-slate-800 to-slate-700 bg-clip-text text-transparent">
             URL Shortener
           </Heading>
           <p className="text-sm text-slate-600 max-w-prose mx-auto">
-            Create short, memorable links in seconds. Paste a long URL below and get a compact shareable link.
+            Just paste a long web address into the box below. This will create a short link that you can share.
           </p>
         </div>
         <UrlShortener baseUrl={baseUrl} />
