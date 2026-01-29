@@ -6,7 +6,7 @@ import {
   RedisUrlRepository,
 } from "@url-shortener/engine";
 import { Flex, Card, Heading } from "@radix-ui/themes";
-import { UrlShortener } from "../components/url-shortener";
+import { UrlShortener } from "../components/UrlShortener";
 
 export function loader() {
   return {

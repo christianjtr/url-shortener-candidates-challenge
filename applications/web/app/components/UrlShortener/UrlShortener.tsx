@@ -2,7 +2,7 @@ import { useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 import { Copy, Loader2, LinkIcon } from 'lucide-react';
 import { Flex, Card, Text, Button, TextField, Separator, Callout, Box } from '@radix-ui/themes';
-import { useUrlShortener } from '../hooks/useUrlShortener';
+import { useUrlShortener } from '../../hooks/useUrlShortener';
 
 interface UrlShortenerProps {
   baseUrl: string;
