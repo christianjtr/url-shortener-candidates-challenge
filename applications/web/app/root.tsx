@@ -9,7 +9,6 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
-import '@radix-ui/themes/styles.css';
 import { Theme } from "@radix-ui/themes";
 import { Toaster } from "sonner";
 
@@ -35,7 +34,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body suppressHydrationWarning className="bg-linear-to-br from-slate-50 via-white to-sky-50 dark:from-slate-900 dark:via-gray-900 dark:to-slate-800">
         {children}
         <ScrollRestoration />
         <Scripts />

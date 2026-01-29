@@ -12,11 +12,11 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
-    @apply bg-gradient-to-br from-slate-50 via-white to-sky-50;
+    @apply bg-linear-to-br from-slate-50 via-white to-sky-50;
 
     @media (prefers-color-scheme: dark) {
         color-scheme: dark;
-        @apply bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800;
+        @apply bg-linear-to-br from-slate-900 via-gray-900 to-slate-800;
     }
 }
 

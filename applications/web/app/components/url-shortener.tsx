@@ -27,16 +27,15 @@ export const UrlShortener = ({ baseUrl }: UrlShortenerProps) => {
       {/* Form */}
       <form onSubmit={shorten} className="space-y-6" noValidate>
         <FormField label="Enter your long URL" error={fieldError} id="url">
-          <TextField.Root
+          <input
             id="url"
-            size="3"
+            type="url"
             placeholder="https://example.com/very/long/url"
             {...form.register('url')}
             aria-invalid={!!fieldError}
             aria-describedby={fieldError ? 'url-error' : undefined}
             className={cn(
-              'transition-all duration-300 ease-out',
-              'focus:shadow-[0_0_0_4px_rgba(99,102,241,0.15)] focus:border-indigo-500'
+              'w-full p-4 border border-blue-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50 text-gray-800 placeholder-gray-400 bg-white shadow-md'
             )}
           />
         </FormField>
@@ -75,16 +74,14 @@ export const UrlShortener = ({ baseUrl }: UrlShortenerProps) => {
           </Text>
 
           <Flex gap="3" align="center" wrap="wrap">
-            <TextField.Root
-              ref={copyRef}
-              value={shortUrl}
-              readOnly
-              size="3"
-              className={cn(
-                'flex-1 font-mono transition-all duration-300 cursor-pointer',
-                'hover:shadow-md hover:border-indigo-300 focus:shadow-[0_0_0_4px_rgba(99,102,241,0.15)]'
-              )}
-            />
+              <input
+                ref={copyRef}
+                value={shortUrl}
+                readOnly
+                className={cn(
+                  'flex-1 p-4 border border-green-300 rounded-lg text-gray-800 bg-green-50 shadow-md font-mono cursor-text'
+                )}
+              />
             <StyledButton
               variant="copy"
               size="lg"
