@@ -1,4 +1,7 @@
-import { Form, useActionData } from "react-router";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useCallback, useRef, useState } from "react";
+import { useNavigation, useActionData, useSubmit } from "react-router";
 import type { Route } from "./+types/_index";
 import { baseUrl } from "@url-shortener/engine";
 import {
@@ -6,6 +9,19 @@ import {
   ShortCodeGenerator,
   RedisUrlRepository,
 } from "@url-shortener/engine";
+import type { ShortenFormSchema } from "../lib/schemas";
+import { shortenFormSchema } from "../lib/schemas";
+import {
+  Card,
+  Flex,
+  Heading,
+  Text,
+  Button,
+  TextField,
+  Separator,
+} from "@radix-ui/themes";
+import { Copy } from "lucide-react";
+import { toast } from "sonner";
 
 export function loader() {
   return {
@@ -30,11 +46,11 @@ export async function action({ request }: Route.ActionArgs) {
       shortenedUrl: `${baseUrl}/s/${shortUrl.code.toString()}`,
     };
   } catch (error) {
-    return { error: (error as Error).message };
+    return { error: (error as Error).message || "Failed to shorten URL" };
   }
 }
 
-export function meta({}: Route.MetaArgs) {
+export function meta({ }: Route.MetaArgs) {
   return [
     { title: "URL Shortener" },
     { name: "description", content: "Shorten your URLs quickly and easily" },
@@ -44,60 +60,128 @@ export function meta({}: Route.MetaArgs) {
 export default function Index({ loaderData }: Route.ComponentProps) {
   const { baseUrl } = loaderData;
   const actionData = useActionData<typeof action>();
+  const navigation = useNavigation();
+  const submit = useSubmit();
+  const isSubmitting = navigation.state === "submitting";
+
+  const [generatedShortUrl, setGeneratedShortUrl] = useState<string | null>(null);
+  const serverError = actionData?.error as string | null;
+
+  const form = useForm<ShortenFormSchema>({
+    resolver: zodResolver(shortenFormSchema),
+    defaultValues: { url: "" },
+  });
+
+  const copyRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (actionData?.shortenedUrl) {
+      setGeneratedShortUrl(actionData.shortenedUrl);
+      toast.success("URL shortened successfully!");
+      form.reset();
+    }
+  }, [actionData?.shortenedUrl, form]);
+
+  const onSubmit = (data: ShortenFormSchema) => {
+    submit(data, { method: "post" });
+  };
+
+  const copyToClipboard = useCallback(async () => {
+    if (copyRef.current && generatedShortUrl) {
+      await navigator.clipboard.writeText(generatedShortUrl);
+      toast.success("Copied to clipboard!");
+    }
+  }, [generatedShortUrl]);
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-lime-400 via-pink-500 to-cyan-300">
-      <div className="bg-yellow-300 p-12 rounded-none border-8 border-dashed border-purple-600 w-full max-w-lg rotate-1 shadow-2xl shadow-red-500">
-        <h1 className="text-4xl font-mono italic text-center mb-8 text-fuchsia-600 underline decoration-wavy decoration-green-500 tracking-widest">
-          ~*~ URL Shortener ~*~
-        </h1>
+    <Flex
+      direction="column"
+      justify="center"
+      align="center"
+      minHeight="100vh"
+      p={{ initial: "4", sm: "6", lg: "8" }}
+      style={{ backgroundColor: "var(--gray-1)" }}
+    >
+      <Card size="3" style={{ width: "100%", maxWidth: 480 }}>
+        <Flex direction="column" gap="5">
+          <Heading size="6" align="center">
+            URL Shortener
+          </Heading>
 
-        <Form method="post" className="flex flex-col gap-6">
-          <input
-            type="text"
-            name="url"
-            placeholder="Enter your URL here..."
-            required
-            className="w-full px-4 py-3 text-base bg-orange-200 border-4 border-blue-600 text-purple-800 placeholder-red-400 rounded focus:outline-none"
-          />
+          <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
+            <Flex direction="column" gap="3">
+              <TextField.Root
+                id="url"
+                placeholder="https://example.com/very/long/url"
+                size="3"
+                {...form.register("url")}
+                aria-invalid={!!form.formState.errors.url}
+                aria-describedby={form.formState.errors.url ? "url-error" : undefined}
+              />
 
-          <div>
-            <button
-              type="submit"
-              className="w-full px-4 py-3 text-base bg-red-500 hover:bg-lime-500 text-yellow-200 border-4 border-teal-400 rounded-full skew-x-3 cursor-pointer"
-            >
-              ★ SHORTEN IT ★
-            </button>
-            <p className="text-sm text-indigo-800 mt-3 text-center font-bold bg-cyan-200 p-2 border-2 border-dotted border-orange-500">
-              Your shortened URL will start with {baseUrl}
-            </p>
-          </div>
-        </Form>
+              {form.formState.errors.url && (
+                <Text
+                  id="url-error"
+                  size="2"
+                  color="red"
+                  role="alert"
+                  aria-live="polite"
+                >
+                  {form.formState.errors.url.message}
+                </Text>
+              )}
 
-        {actionData?.shortenedUrl && (
-          <div className="mt-8 p-4 bg-violet-400 rounded-3xl border-4 border-double border-yellow-500 -rotate-1">
-            <p className="text-lg text-lime-300 mb-2 font-black uppercase">
-              Your shortened URL:
-            </p>
-            <a
-              href={actionData.shortenedUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-red-200 break-all font-mono text-xl hover:text-blue-900 bg-pink-600 p-2 block"
-            >
-              {actionData.shortenedUrl}
-            </a>
-          </div>
-        )}
+              <Button
+                type="submit"
+                size="3"
+                variant="solid"
+                loading={isSubmitting}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Shortening..." : "Shorten URL"}
+              </Button>
+            </Flex>
+          </form>
 
-        {actionData?.error && (
-          <div className="mt-8 p-4 bg-lime-500 rounded-none border-8 border-solid border-red-700">
-            <p className="text-2xl text-blue-800 font-black">
-              {actionData.error}
-            </p>
-          </div>
-        )}
-      </div>
-    </main>
+          <Text size="2" align="center" color="gray">
+            Shortened URLs will start with {baseUrl}
+          </Text>
+
+          {generatedShortUrl && (
+            <>
+              <Separator my="4" size="4" />
+              <Flex direction="column" gap="3">
+                <Text size="2" weight="medium">
+                  Your shortened URL:
+                </Text>
+                <Flex gap="2" align="center">
+                  <TextField.Root
+                    ref={copyRef}
+                    value={generatedShortUrl}
+                    readOnly
+                    size="3"
+                    style={{ flex: 1, fontFamily: "monospace" }}
+                  />
+                  <Button
+                    variant="soft"
+                    size="2"
+                    onClick={copyToClipboard}
+                    aria-label="Copy shortened URL to clipboard"
+                  >
+                    <Copy size={16} />
+                  </Button>
+                </Flex>
+              </Flex>
+            </>
+          )}
+
+          {serverError && (
+            <Text size="2" color="red" align="center" weight="medium">
+              {serverError}
+            </Text>
+          )}
+        </Flex>
+      </Card>
+    </Flex>
   );
 }
