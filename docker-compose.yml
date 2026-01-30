@@ -11,9 +11,6 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-    profiles:
-      - dev
-      - prod
 
   web:
     build:
@@ -23,11 +20,8 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-    env_file:
-      - .env
-    volumes:
-      - turbo-cache:/app/.turbo
-      - pnpm-store:/root/.local/share/pnpm/store
+      - PUBLIC_URL=http://localhost:3000
+      - REDIS_URL=redis://redis:6379
     depends_on:
       redis:
         condition: service_healthy
@@ -38,17 +32,6 @@ services:
       retries: 3
       start_period: 40s
     restart: unless-stopped
-    profiles:
-      - dev
-      - prod
-    networks:
-      - backend
 
 volumes:
   redis_data:
-  turbo-cache:
-  pnpm-store:
-
-networks:
-  backend:
-    driver: bridge
