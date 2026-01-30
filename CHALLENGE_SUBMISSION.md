@@ -10,6 +10,11 @@ Focused on:
 - **Frontend** (High-level)
 - **Infrastructure and service reliability**
 
+#### Sample
+
+https://github.com/user-attachments/assets/03e2af68-e6f9-4650-a7bf-31b73503339a
+
+
 #### **Phase 1: Environment Setup & Version Control**
 
 The project began by **forking the upstream repository** from `kabiliolabs`. I established a clean development branch to maintain a clear history of my refactor and ensured the local development environment was isolated to avoid dependency conflicts.
